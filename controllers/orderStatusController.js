@@ -4,7 +4,7 @@ const AppError = require('../utils/appError');
 const factory = require('./handlerFactory');
 
 exports.getOrderStatus = factory.getAll(OrderStatus);
-exports.getOrderStatus = factory.getOne(OrderStatus);
+exports.getAllOrderStatus = factory.getOne(OrderStatus);
 
 exports.updateOrderStatus = catchAsync(async (req, res, next) => {
   const check = await OrderStatus.findOne(req.body.id);
