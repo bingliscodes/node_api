@@ -1,11 +1,11 @@
 const mongoose = require('mongoose');
+const OrderStatus = require('./orderStatusModel');
 
 const orderSchema = new mongoose.Schema(
   {
     status: {
-      type: String,
-      enum: ['Pending Confirmation', 'Confirmed', 'Shipped', 'Delivered'],
-      default: 'Pending Confirmation',
+      type: mongoose.Schema.ObjectId,
+      ref: 'OrderStatus',
     },
     user: {
       type: mongoose.Schema.ObjectId,
@@ -19,13 +19,6 @@ const orderSchema = new mongoose.Schema(
         required: [true, 'Order must contain at least one product'],
       },
     ],
-    createdAt: {
-      type: Date,
-      default: Date.now(),
-    },
-    confirmedAt: Date,
-    shippedAt: Date,
-    deliveredAt: Date,
   },
   {
     toJSON: { virtuals: true },
@@ -33,13 +26,22 @@ const orderSchema = new mongoose.Schema(
   },
 );
 
+// Keep in mind populate takes resources
 orderSchema.pre(/^find/, function (next) {
   this.populate({
     path: 'user',
     select: 'name email',
-  }).populate({ path: 'products', select: 'name -_id' });
+  })
+    .populate({ path: 'products', select: 'name -_id' })
+    .populate('status');
 
   next();
+});
+
+orderSchema.pre('save', async function () {
+  if (this.isNew) {
+    this.status = await OrderStatus.create({});
+  }
 });
 
 const Order = mongoose.model('Order', orderSchema);
