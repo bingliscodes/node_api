@@ -32,13 +32,19 @@ exports.getAll = (Model) =>
   catchAsync(async (req, res, next) => {
     let filter = {};
     if (req.params.userId) filter = { user: req.params.userId };
-    const features = new APIFeatures(Model.find(filter), req.query).paginate();
 
-    const doc = await features.query;
+    let filteredResults = new APIFeatures(Model.find(filter), req.query);
+    filteredResults = await filteredResults.query;
+
+    const paginatedResults = new APIFeatures(
+      Model.find(filter),
+      req.query,
+    ).paginate();
+    const doc = await paginatedResults.query;
 
     res.status(200).json({
       status: 'success',
-      results: doc.length,
+      results: filteredResults.length,
       data: {
         data: doc,
       },
