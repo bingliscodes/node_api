@@ -53,5 +53,3 @@ orderSchema.pre('save', async function (next) {
 const Order = mongoose.model('Order', orderSchema);
 
 module.exports = Order;
-
-//TODO: copy product details to the order when created rather than populating from a reference.

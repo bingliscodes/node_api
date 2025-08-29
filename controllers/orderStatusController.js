@@ -3,29 +3,26 @@ const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const factory = require('./handlerFactory');
 
-exports.getOrderStatus = factory.getAll(OrderStatus);
-exports.getAllOrderStatus = factory.getOne(OrderStatus);
+exports.getOrderStatus = factory.getOne(OrderStatus);
+exports.getAllOrderStatus = factory.getAll(OrderStatus);
 
 //TODO: Check if the status we are attempting to update is non-null. Do not update anything if it is
 exports.updateOrderStatus = catchAsync(async (req, res, next) => {
-  const check = await OrderStatus.findOne(req.body.id);
+  const doc = await OrderStatus.findOne(req.body.id);
+  if (!doc) return next(new AppError('No document found with that ID', 404));
 
   const { status } = req.body;
 
-  const doc = await OrderStatus.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    runValidators: true,
-  });
+  if (!status) return next(new AppError('Please provide a status', 400));
 
-  if (!doc) return next(new AppError('No document found with that ID', 404));
+  const now = new Date();
 
-  if (status && check.status !== status) {
-    const now = new Date();
+  if (status === 'Confirmed' && !doc.confirmedAt) doc.confirmedAt = now;
+  if (status === 'Shipped' && !doc.shippedAt) doc.shippedAt = now;
+  if (status === 'Delivered' && !doc.deliveredAt) doc.deliveredAt = now;
 
-    if (status === 'Confirmed') req.body.confirmedAt = now;
-    if (status === 'Shipped') req.body.shippedAt = now;
-    if (status === 'Delivered') req.body.deliveredAt = now;
-  }
+  await doc.save();
+
   res.status(200).json({
     staus: 'success',
     data: {

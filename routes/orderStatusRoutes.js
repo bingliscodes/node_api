@@ -3,7 +3,7 @@ const orderStatusController = require('../controllers/orderStatusController');
 
 const router = express.Router();
 
-router.route('/').get(orderStatusController.getOrderStatus);
+router.route('/').get(orderStatusController.getAllOrderStatus);
 
 router
   .route('/:id')
