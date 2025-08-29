@@ -6,6 +6,7 @@ const factory = require('./handlerFactory');
 exports.getOrderStatus = factory.getAll(OrderStatus);
 exports.getAllOrderStatus = factory.getOne(OrderStatus);
 
+//TODO: Check if the status we are attempting to update is non-null. Do not update anything if it is
 exports.updateOrderStatus = catchAsync(async (req, res, next) => {
   const check = await OrderStatus.findOne(req.body.id);
 
